@@ -1,0 +1,42 @@
+# Claude
+.claude/
+
+# C++ build artifacts
+*.o
+*.obj
+*.exe
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.dll
+x64/
+x86/
+Debug/
+Release/
+
+# Go
+*.test
+server/vendor/
+client/vendor/
+
+# Protobuf generated
+rat/modules/pb/*.go
+
+# Database
+*.db
+
+# IDE
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Test artifacts
+server/test/file.dmp
+server/test/dump.csv
+
+# Implant test file
+implant/test.cpp
+
+
