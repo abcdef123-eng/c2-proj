@@ -1,22 +1,21 @@
 syntax = "proto3";
 
-package pb
+package pb;
 
-option go_package = "modules/pb";
+option go_package = "github.com/abcdef123-eng/c2-proj/modules/pb";
 
 message CommandReqData {
-     string guid         = 1;
-     int32  command_code = 2;
-     string param        = 3;
-     string param2       = 4;
- }
+    string guid         = 1;
+    int32  command_code = 2;
+    string param        = 3;
+    string param2       = 4;
+}
 
- message CommandRespData {
-     string status  = 1;
-     string message = 2;
- }
+message CommandRespData {
+    string status  = 1;
+    string message = 2;
+}
 
- service C2Service {
-     rpc InsertIntoDatabase (CommandReqData) returns
- (CommandRespData);
- }
+service C2Service {
+    rpc InsertIntoDatabase (CommandReqData) returns (CommandRespData);
+}
