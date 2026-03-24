@@ -1,4 +1,4 @@
-module github.com/abcdef123-eng/c2-proj/newClient
+module github.com/execute-assembly/c2-proj/newClient
 
 go 1.26.1
 
