@@ -3,7 +3,7 @@ package rpc
 import (
 	"net"
 
-	pb "github.com/abcdef123-eng/c2-proj/modules/pb"
+	pb "github.com/execute-assembly/c2-proj/modules/pb"
 	"google.golang.org/grpc"
 )
 
