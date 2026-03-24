@@ -5,7 +5,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/abcdef123-eng/c2-proj/newClient/internal/commander"
+	"github.com/execute-assembly/c2-proj/newClient/internal/commander"
 	"github.com/peterh/liner"
 )
 
