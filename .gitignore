@@ -1,8 +1,6 @@
 # Claude
 .claude/
 
-/server/
-/client/
 
 # C++ build artifacts
 *.o
