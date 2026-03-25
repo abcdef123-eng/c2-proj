@@ -8,7 +8,7 @@ import (
 )
 
 type Server struct {
-	pb.UnimplementedMyServiceServer
+	pb.C2Service
 }
 
 func runRpcServer() error {
