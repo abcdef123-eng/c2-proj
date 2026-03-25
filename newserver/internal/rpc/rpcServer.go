@@ -8,16 +8,19 @@ import (
 )
 
 type Server struct {
-	pb.C2Service
+	pb.UnimplementedC2ServiceServer
 }
 
-func runRpcServer() error {
-	lis, err := net.Listen("tcp", ":50001")
+func RunRpcServer() error {
+	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		return err
 	}
 
 	s := grpc.NewServer()
-	pb.RegisterMyServiceServer
-
+	pb.RegisterC2ServiceServer(s, &Server{})
+	go func() {
+		s.Serve(lis)
+	}()
+	return nil
 }
