@@ -1,8 +1,10 @@
 package rpc
 
 import (
+	"fmt"
 	"net"
 
+	"github.com/execute-assembly/c2-proj/newserver/internal/config"
 	pb "github.com/execute-assembly/c2-proj/modules/pb"
 	"google.golang.org/grpc"
 )
@@ -12,7 +14,7 @@ type Server struct {
 }
 
 func RunRpcServer() error {
-	lis, err := net.Listen("tcp", ":50051")
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", config.Cfg.GrpcPort))
 	if err != nil {
 		return err
 	}

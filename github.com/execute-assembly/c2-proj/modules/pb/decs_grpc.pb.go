@@ -19,17 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	C2Service_SendCommand_FullMethodName = "/pb.C2Service/SendCommand"
+	C2Service_InsertIntoDatabase_FullMethodName = "/pb.C2Service/InsertIntoDatabase"
 )
 
 // C2ServiceClient is the client API for C2Service service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// Define the gRPC service
 type C2ServiceClient interface {
-	// RPC method: SendCommand
-	SendCommand(ctx context.Context, in *CommandReqData, opts ...grpc.CallOption) (*CommandRespData, error)
+	InsertIntoDatabase(ctx context.Context, in *CommandReqData, opts ...grpc.CallOption) (*CommandRespData, error)
 }
 
 type c2ServiceClient struct {
@@ -40,10 +37,10 @@ func NewC2ServiceClient(cc grpc.ClientConnInterface) C2ServiceClient {
 	return &c2ServiceClient{cc}
 }
 
-func (c *c2ServiceClient) SendCommand(ctx context.Context, in *CommandReqData, opts ...grpc.CallOption) (*CommandRespData, error) {
+func (c *c2ServiceClient) InsertIntoDatabase(ctx context.Context, in *CommandReqData, opts ...grpc.CallOption) (*CommandRespData, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CommandRespData)
-	err := c.cc.Invoke(ctx, C2Service_SendCommand_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, C2Service_InsertIntoDatabase_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -53,11 +50,8 @@ func (c *c2ServiceClient) SendCommand(ctx context.Context, in *CommandReqData, o
 // C2ServiceServer is the server API for C2Service service.
 // All implementations must embed UnimplementedC2ServiceServer
 // for forward compatibility.
-//
-// Define the gRPC service
 type C2ServiceServer interface {
-	// RPC method: SendCommand
-	SendCommand(context.Context, *CommandReqData) (*CommandRespData, error)
+	InsertIntoDatabase(context.Context, *CommandReqData) (*CommandRespData, error)
 	mustEmbedUnimplementedC2ServiceServer()
 }
 
@@ -68,8 +62,8 @@ type C2ServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedC2ServiceServer struct{}
 
-func (UnimplementedC2ServiceServer) SendCommand(context.Context, *CommandReqData) (*CommandRespData, error) {
-	return nil, status.Error(codes.Unimplemented, "method SendCommand not implemented")
+func (UnimplementedC2ServiceServer) InsertIntoDatabase(context.Context, *CommandReqData) (*CommandRespData, error) {
+	return nil, status.Error(codes.Unimplemented, "method InsertIntoDatabase not implemented")
 }
 func (UnimplementedC2ServiceServer) mustEmbedUnimplementedC2ServiceServer() {}
 func (UnimplementedC2ServiceServer) testEmbeddedByValue()                   {}
@@ -92,20 +86,20 @@ func RegisterC2ServiceServer(s grpc.ServiceRegistrar, srv C2ServiceServer) {
 	s.RegisterService(&C2Service_ServiceDesc, srv)
 }
 
-func _C2Service_SendCommand_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _C2Service_InsertIntoDatabase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CommandReqData)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(C2ServiceServer).SendCommand(ctx, in)
+		return srv.(C2ServiceServer).InsertIntoDatabase(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: C2Service_SendCommand_FullMethodName,
+		FullMethod: C2Service_InsertIntoDatabase_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(C2ServiceServer).SendCommand(ctx, req.(*CommandReqData))
+		return srv.(C2ServiceServer).InsertIntoDatabase(ctx, req.(*CommandReqData))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -118,8 +112,8 @@ var C2Service_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*C2ServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SendCommand",
-			Handler:    _C2Service_SendCommand_Handler,
+			MethodName: "InsertIntoDatabase",
+			Handler:    _C2Service_InsertIntoDatabase_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

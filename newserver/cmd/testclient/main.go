@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 )
@@ -28,6 +29,7 @@ func main() {
 
 	buf := new(bytes.Buffer)
 
+	binary.Write(buf, binary.LittleEndian, uint32(COMMAND_REGISTER_CLIENT))
 	writeString(buf, guid)
 	writeString(buf, username)
 	writeString(buf, hostname)
@@ -43,8 +45,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	req.Header.Set("X-Type", fmt.Sprintf("%d", COMMAND_REGISTER_CLIENT))
-
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println("failed to send request:", err)
@@ -53,4 +53,18 @@ func main() {
 	defer resp.Body.Close()
 
 	fmt.Println("response status:", resp.Status)
+
+	if resp.StatusCode == http.StatusOK {
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Println("failed to read response:", err)
+			os.Exit(1)
+		}
+		r := bytes.NewReader(body)
+		var jwtLen uint32
+		binary.Read(r, binary.LittleEndian, &jwtLen)
+		jwtData := make([]byte, jwtLen)
+		io.ReadFull(r, jwtData)
+		fmt.Printf("JWT (%d bytes): %s\n", jwtLen, string(jwtData))
+	}
 }

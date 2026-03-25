@@ -12,6 +12,7 @@ type Config struct {
 	GrpcPort     int    `json:"grpc_port"`
 	GetEndpoint  string `json:"getEndpoint"`
 	PostEndpoint string `json:"postEndpoint"`
+	JwtSecret    string `json:"jwt_secret"`
 }
 
 var Cfg *Config

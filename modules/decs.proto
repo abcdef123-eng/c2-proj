@@ -2,20 +2,25 @@ syntax = "proto3";
 
 package pb;
 
-option go_package = "github.com/abcdef123-eng/c2-proj/modules/pb";
+// Tell protoc where the Go code should live, matching your module
+option go_package = "github.com/execute-assembly/c2-proj/modules/pb";
 
+// Request message for a command
 message CommandReqData {
-    string guid         = 1;
-    int32  command_code = 2;
-    string param        = 3;
-    string param2       = 4;
+  string guid = 1;
+  int32 command_code = 2;
+  string param = 3;
+  string param2 = 4;
 }
 
+// Response message for a command
 message CommandRespData {
-    string status  = 1;
-    string message = 2;
+  string status = 1;
+  string message = 2;
 }
 
+// Define the gRPC service
 service C2Service {
-    rpc InsertIntoDatabase (CommandReqData) returns (CommandRespData);
+  // RPC method: SendCommand
+  rpc SendCommand(CommandReqData) returns (CommandRespData);
 }

@@ -2,13 +2,14 @@ package server
 
 import (
 	"bytes"
+	"encoding/binary"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
 
-	"github.com/execute-assembly/c2-proj/newserver/internal/bytehandler"
 	"github.com/execute-assembly/c2-proj/newserver/internal/config"
-	"github.com/execute-assembly/c2-proj/newserver/internal/database"
+
 	"github.com/go-chi/chi/v5"
 )
 
@@ -23,11 +24,11 @@ func StartServer() {
 	//r.Get(config.Cfg.GetEndpoint, GetHandler)
 	r.Post(config.Cfg.PostEndpoint, PostHandler)
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello Chi!"))
-	})
+	// r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+	// 	w.Write([]byte("Hello Chi!"))
+	// })
 
-	http.ListenAndServe(":8080", r)
+	http.ListenAndServe(fmt.Sprintf("%s:%d", config.Cfg.Host, config.Cfg.Port), r)
 
 }
 
@@ -41,13 +42,19 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	reader := bytes.NewReader(body)
-	CommandType := bytehandler.Read4(reader)
+	var CommandType uint32
+	binary.Read(reader, binary.LittleEndian, &CommandType)
 
 	switch CommandType {
 	case COMMAND_TYPE_REGISTER:
 		Ip, _, _ := net.SplitHostPort(r.RemoteAddr)
-		database.RegisterClient(reader, Ip)
-
+		JwtBytes, err := NewClientRegisterHandler(Ip, reader)
+		if err != nil {
+			http.Error(w, "Failed", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/octet-stream")
+		w.Write(JwtBytes)
 	}
 
 }

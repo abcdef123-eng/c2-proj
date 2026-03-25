@@ -85,7 +85,8 @@ func createDefaultConfig(path string) error {
 	"port": 8080,
 	"grpc_port": 50051,
 	"getEndpoint": "/api/get",
-	"postEndpoint": "/api/post"
+	"postEndpoint": "/api/post",
+	"jwt_secret": "changeme"
 }`
 	return os.WriteFile(path, []byte(defaultConfig), 0644)
 }
@@ -102,7 +103,7 @@ func createDatabase(path string) error {
 	defer db.Close()
 
 	clientTable := `CREATE TABLE IF NOT EXISTS clients(
-		guid         TEXT NOT NULL,
+		guid         TEXT PRIMARY KEY NOT NULL,
 		code_name    TEXT NOT NULL,
 		username     TEXT NOT NULL,
 		hostname     TEXT NOT NULL,

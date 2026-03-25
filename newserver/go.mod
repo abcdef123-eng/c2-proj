@@ -5,7 +5,9 @@ go 1.26.1
 require (
 	github.com/execute-assembly/c2-proj/modules v0.0.0
 	github.com/go-chi/chi/v5 v5.2.5
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	google.golang.org/grpc v1.79.3
+	modernc.org/sqlite v1.47.0
 )
 
 replace github.com/execute-assembly/c2-proj/modules => ../modules
@@ -24,5 +26,4 @@ require (
 	modernc.org/libc v1.70.0 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
-	modernc.org/sqlite v1.47.0 // indirect
 )
