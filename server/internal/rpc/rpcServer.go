@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/execute-assembly/c2-proj/newserver/internal/config"
+	"github.com/execute-assembly/c2-proj/server/internal/config"
 	pb "github.com/execute-assembly/c2-proj/modules/pb"
 	"google.golang.org/grpc"
 )

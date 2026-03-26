@@ -18,8 +18,8 @@ func Write4(w io.Writer, val any) error {
 }
 
 func WriteString(w io.Writer, str string) error {
-	Len := uint32(len(str))
-	if err := Write4(w, Len); err != nil {
+	strLen := uint32(len(str))
+	if err := Write4(w, strLen); err != nil {
 		return err
 	}
 	if _, err := w.Write([]byte(str)); err != nil {

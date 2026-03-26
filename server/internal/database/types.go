@@ -14,13 +14,13 @@ var (
 )
 
 type ClientData struct {
-	Guid         string
-	Code_name    string
-	Username     string
-	Hostname     string
-	Ip           string
-	Arch         string
-	Pid          int32
-	Version      string
-	Last_checkin string
+	Guid        string
+	CodeName    string
+	Username    string
+	Hostname    string
+	Ip          string
+	Arch        string
+	Pid         int32
+	Version     string
+	LastCheckin string
 }

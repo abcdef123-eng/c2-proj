@@ -216,6 +216,17 @@ per task:
   [param2]     N bytes
 ```
 
+### type 52: COMMAND_OUTPUT (implant -> server)
+
+Sent by the implant after executing a task. JWT must be present in `Authorization: Bearer` header (same as GET). No GUID in the message body — resolved from JWT server-side.
+
+```
+[type]          4 bytes  uint32   = 52
+[task_id]       4 bytes  int32
+[output_len]    4 bytes  uint32
+[output]        N bytes
+```
+
 ---
 
 ## modules/
@@ -245,6 +256,103 @@ Both `server/` and `client/` import this via a `replace` directive in their `go.
 - `modernc.org/sqlite` used — pure Go, no CGo needed
 - `ConvertCodeName` returns `status=3` (not a gRPC error) for "not found" so the client can safely read the response
 - Task counter (`counter int32`) is atomic, incremented per `SendCommand` call, resets on server restart
+
+---
+
+## Planned: command output handling (NOT YET IMPLEMENTED)
+
+### Task lifecycle
+
+```
+SendCommand (gRPC)
+  → CommandMap[guid][]CommandData          (queued, in-memory)
+  ↓
+GET /api/get (implant polls)
+  → move tasks out of CommandMap
+  → into PendingMap[taskID]PendingTask     (delivered, awaiting output, in-memory)
+  ↓
+POST /api/post type 52 (implant sends output)
+  → read taskID, lookup PendingMap[taskID]
+  → write completed task to task_history in SQLite
+  → delete from PendingMap
+  → broadcast output to operator via Subscribe
+```
+
+### PendingMap
+
+Lives in `rpcFuncs.go` alongside `CommandMap`. Keyed by `TaskID` (globally unique, so no GUID needed for lookup).
+
+```go
+type PendingTask struct {
+    Guid        string
+    CommandCode int
+    Param1      string
+    Param2      string
+}
+
+var (
+    PendingMap = map[int32]PendingTask{}
+    PendingMu  sync.RWMutex
+)
+```
+
+**Caveat**: `PendingMap` is in-memory only. If the server restarts while tasks are in-flight, pending tasks are lost and TaskIDs reset — orphaned output POSTs will fail the lookup silently.
+
+### SQLite: task_history table
+
+New table to add in `create_db.go`:
+
+```sql
+task_history(
+    task_id      INT  PRIMARY KEY NOT NULL,
+    guid         TEXT NOT NULL,
+    command_code INT  NOT NULL,
+    param1       TEXT NOT NULL,
+    param2       TEXT NOT NULL,
+    output       TEXT NOT NULL,
+    completed_at TEXT NOT NULL    -- Unix timestamp as TEXT
+)
+```
+
+Write-on-complete only (not on queue). No intermediate "sent but pending" row.
+
+### New db_ops functions needed
+
+- `WriteTaskHistory_db(taskID int32, guid string, commandCode int, param1, param2, output string) error`
+- `GetTaskHistory_db(guid string) ([]TaskHistoryEntry, error)` — for operator history retrieval
+
+### New binary parsing needed
+
+In `bytes_read.go`, add `ParseCommandOutput`:
+
+```go
+type CommandOutputData struct {
+    TaskID int32
+    Output string
+}
+// reads: [task_id int32] [output_len uint32] [output N bytes]
+// type field (52) already consumed by PostHandler before this is called
+```
+
+### Server changes needed
+
+- `server.go`: add `COMMAND_OUTPUT = 52` constant; add case in `PostHandler` switch — extract JWT from `Authorization` header, verify to get GUID, call `CommandOutputHandler`
+- `route_handlers.go`:
+  - Update `GetTaskHandler`: after crafting response, move delivered tasks into `PendingMap` instead of deleting them
+  - Add `CommandOutputHandler(guid string, reader *bytes.Reader) error`: parse output, lookup pending, write history, delete from pending, broadcast
+- `rpcFuncs.go`: add `PendingMap`/`PendingMu`; broadcast `command_output` event via `BroadcastEvent`
+
+### New gRPC RPC needed
+
+`GetHistory(GetHistoryReq) returns (GetHistoryResp)` — operator fetches completed task history for an implant. Needs proto changes + regenerated pb files.
+
+Alternatively (or additionally): broadcast output in real time via the existing `Subscribe` stream using `event_type = "command_output"`, so connected operators see results immediately without polling.
+
+### Client changes needed
+
+- `client/cmd/main.go`: handle `"command_output"` event type in the Subscribe goroutine — print the output
+- `commandHandlers.go`: add `HandleHistory` for the new `GetHistory` RPC
+- `commander.go`: add `"history"` command to `Dispatch`
 
 ---
 

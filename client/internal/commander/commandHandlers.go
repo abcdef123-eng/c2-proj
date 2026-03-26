@@ -17,15 +17,13 @@ import (
 var ClientInUse string
 
 func ConvertTime(unixTime string) string {
-
 	timeInt, err := strconv.ParseInt(unixTime, 10, 64)
 	if err != nil {
 		return ""
 	}
 
 	t := time.Unix(timeInt, 0)
-	now := time.Now()
-	duration := now.Sub(t)
+	duration := time.Since(t)
 
 	if duration < time.Minute {
 		return fmt.Sprintf("%ds", int(duration.Seconds()))
@@ -34,9 +32,7 @@ func ConvertTime(unixTime string) string {
 	} else if duration < 24*time.Hour {
 		return fmt.Sprintf("%dh", int(duration.Hours()))
 	}
-
-	return ""
-
+	return fmt.Sprintf("%dd", int(duration.Hours()/24))
 }
 
 func HandleListClients() error {
@@ -62,7 +58,6 @@ func HandleListClients() error {
 	fmt.Printf("\n")
 
 	return nil
-
 }
 
 func UseClient(args []string) error {
@@ -105,16 +100,12 @@ func HandleLS(args []string) error {
 		PrintErr("Usage: ls <path>")
 		return fmt.Errorf("Not Enough Args")
 	}
-	// 	message CommandReqData {
-	//   string guid = 1;
-	//   int32 command_code = 2;
-	//   string param = 3;
-	//   string param2 = 4;
-	// }
-	//
-	resp, err := rpc.Client.SendCommand(context.Background(), &pb.CommandReqData{Guid: ClientInUse,
+
+	resp, err := rpc.Client.SendCommand(context.Background(), &pb.CommandReqData{
+		Guid:        ClientInUse,
 		CommandCode: int32(CommandMap["ls"]),
-		Param:       args[0]})
+		Param:       args[0],
+	})
 	if err != nil {
 		return err
 	}
@@ -125,5 +116,4 @@ func HandleLS(args []string) error {
 		PrintOk("Command Queued")
 	}
 	return nil
-
 }

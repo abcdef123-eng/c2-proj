@@ -60,7 +60,7 @@ func (r *Reader) ReadString(len uint32) string {
 
 /*
  * [Guid Length] 4 bytes
- * [Gudi string] N bytes
+ * [Guid string] N bytes
  * [Username length] 4 bytes
  * [username string] N bytes
  * [Hostname length] 4 bytes

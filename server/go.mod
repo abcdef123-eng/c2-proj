@@ -1,4 +1,4 @@
-module github.com/execute-assembly/c2-proj/newserver
+module github.com/execute-assembly/c2-proj/server
 
 go 1.26.1
 

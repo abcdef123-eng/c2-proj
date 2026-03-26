@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 
-	bytehandler "github.com/execute-assembly/c2-proj/newserver/internal/bytes"
-	"github.com/execute-assembly/c2-proj/newserver/internal/database"
-	"github.com/execute-assembly/c2-proj/newserver/internal/rpc"
+	bytehandler "github.com/execute-assembly/c2-proj/server/internal/bytes"
+	"github.com/execute-assembly/c2-proj/server/internal/database"
+	"github.com/execute-assembly/c2-proj/server/internal/rpc"
 )
 
 func NewClientRegisterHandler(Ip string, reader *bytes.Reader) ([]byte, error) {

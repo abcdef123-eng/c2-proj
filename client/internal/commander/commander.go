@@ -14,32 +14,29 @@ type CommandData struct {
 }
 
 func Parse(args string) (CommandData, error) {
-	CommandArgs, err := shlex.Split(args)
+	commandArgs, err := shlex.Split(args)
 	if err != nil {
 		return CommandData{}, err
 	}
 
-	if len(CommandArgs) == 0 {
+	if len(commandArgs) == 0 {
 		return CommandData{}, fmt.Errorf("Not Enough args")
 	}
 
 	return CommandData{
-		Name: strings.ToLower(CommandArgs[0]),
-		Args: CommandArgs[1:],
+		Name: strings.ToLower(commandArgs[0]),
+		Args: commandArgs[1:],
 	}, nil
 }
 
-func Dispatch(Commands CommandData) error {
-	switch Commands.Name {
+func Dispatch(cmd CommandData) error {
+	switch cmd.Name {
 	case "ls":
-		err := HandleLS(Commands.Args)
-		if err != nil {
-			break
-		}
+		HandleLS(cmd.Args)
 	case "list":
 		HandleListClients()
 	case "use":
-		UseClient(Commands.Args)
+		UseClient(cmd.Args)
 	case "exit":
 		os.Exit(0)
 	default:

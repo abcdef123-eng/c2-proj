@@ -1,7 +1,6 @@
 package main
 
 import (
-	//"github.com/execute-assembly/c2-proj/client/internal/client"
 	"context"
 	"fmt"
 	"os"

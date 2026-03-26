@@ -185,12 +185,6 @@ func pollTasks(jwt string) {
 
 func main() {
 	jwt := register()
-	// if len(os.Args) < 2 {
-	// 	fmt.Println("usage: testclient <jwt>")
-	// 	os.Exit(1)
-	// }
-	// jwt := os.Args[1]
-
 	fmt.Println("Polling for tasks every 3s (Ctrl+C to stop)...")
 	for {
 		pollTasks(jwt)

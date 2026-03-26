@@ -6,10 +6,10 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/execute-assembly/c2-proj/newserver/internal/config"
-	"github.com/execute-assembly/c2-proj/newserver/internal/database"
-	"github.com/execute-assembly/c2-proj/newserver/internal/rpc"
-	"github.com/execute-assembly/c2-proj/newserver/internal/server"
+	"github.com/execute-assembly/c2-proj/server/internal/config"
+	"github.com/execute-assembly/c2-proj/server/internal/database"
+	"github.com/execute-assembly/c2-proj/server/internal/rpc"
+	"github.com/execute-assembly/c2-proj/server/internal/server"
 )
 
 func main() {
@@ -43,7 +43,4 @@ func main() {
 	fmt.Println("[+] gRPC Server Started..")
 
 	server.StartServer()
-
-	return
-
 }
