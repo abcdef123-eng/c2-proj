@@ -7,37 +7,35 @@ import (
 
 	pb "github.com/execute-assembly/c2-proj/modules/pb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 )
+
+var Client pb.C2ServiceClient
+var Ready = make(chan struct{})
 
 func RunRpcClient() error {
 	conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		fmt.Println("ERROR !2")
-
 		return err
 	}
-
 	defer conn.Close()
 
-	client := pb.NewC2ServiceClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	resp, err := client.InsertIntoDatabase(ctx, &pb.CommandReqData{
-		Guid:        "1111-1111-1111-1111",
-		CommandCode: 1,
-		Param:       "hello",
-		Param2:      "hello",
-	})
-	if err != nil {
-		fmt.Println(err)
-		return err
+	conn.Connect()
+	ctx2, cancel2 := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel2()
+	for {
+		state := conn.GetState()
+		if state == connectivity.Ready {
+			break
+		}
+		if !conn.WaitForStateChange(ctx2, state) {
+			return fmt.Errorf("could not connect to server")
+		}
 	}
 
-	fmt.Printf("Status: %s\n", resp.Status)
-	fmt.Printf("Message: %s\n", resp.Message)
-	return nil
+	Client = pb.NewC2ServiceClient(conn)
+	close(Ready)
 
+	select {}
 }

@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -19,7 +20,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	C2Service_SendCommand_FullMethodName = "/pb.C2Service/SendCommand"
+	C2Service_SendCommand_FullMethodName     = "/pb.C2Service/SendCommand"
+	C2Service_ListClients_FullMethodName     = "/pb.C2Service/ListClients"
+	C2Service_ConvertCodeName_FullMethodName = "/pb.C2Service/ConvertCodeName"
+	C2Service_Subscribe_FullMethodName       = "/pb.C2Service/Subscribe"
 )
 
 // C2ServiceClient is the client API for C2Service service.
@@ -28,8 +32,10 @@ const (
 //
 // Define the gRPC service
 type C2ServiceClient interface {
-	// RPC method: SendCommand
 	SendCommand(ctx context.Context, in *CommandReqData, opts ...grpc.CallOption) (*CommandRespData, error)
+	ListClients(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListClientResp, error)
+	ConvertCodeName(ctx context.Context, in *ConvertCodeMessage, opts ...grpc.CallOption) (*ConvertCodeResp, error)
+	Subscribe(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ServerEvent], error)
 }
 
 type c2ServiceClient struct {
@@ -50,14 +56,55 @@ func (c *c2ServiceClient) SendCommand(ctx context.Context, in *CommandReqData, o
 	return out, nil
 }
 
+func (c *c2ServiceClient) ListClients(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListClientResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListClientResp)
+	err := c.cc.Invoke(ctx, C2Service_ListClients_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *c2ServiceClient) ConvertCodeName(ctx context.Context, in *ConvertCodeMessage, opts ...grpc.CallOption) (*ConvertCodeResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ConvertCodeResp)
+	err := c.cc.Invoke(ctx, C2Service_ConvertCodeName_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *c2ServiceClient) Subscribe(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ServerEvent], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &C2Service_ServiceDesc.Streams[0], C2Service_Subscribe_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[emptypb.Empty, ServerEvent]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type C2Service_SubscribeClient = grpc.ServerStreamingClient[ServerEvent]
+
 // C2ServiceServer is the server API for C2Service service.
 // All implementations must embed UnimplementedC2ServiceServer
 // for forward compatibility.
 //
 // Define the gRPC service
 type C2ServiceServer interface {
-	// RPC method: SendCommand
 	SendCommand(context.Context, *CommandReqData) (*CommandRespData, error)
+	ListClients(context.Context, *emptypb.Empty) (*ListClientResp, error)
+	ConvertCodeName(context.Context, *ConvertCodeMessage) (*ConvertCodeResp, error)
+	Subscribe(*emptypb.Empty, grpc.ServerStreamingServer[ServerEvent]) error
 	mustEmbedUnimplementedC2ServiceServer()
 }
 
@@ -70,6 +117,15 @@ type UnimplementedC2ServiceServer struct{}
 
 func (UnimplementedC2ServiceServer) SendCommand(context.Context, *CommandReqData) (*CommandRespData, error) {
 	return nil, status.Error(codes.Unimplemented, "method SendCommand not implemented")
+}
+func (UnimplementedC2ServiceServer) ListClients(context.Context, *emptypb.Empty) (*ListClientResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListClients not implemented")
+}
+func (UnimplementedC2ServiceServer) ConvertCodeName(context.Context, *ConvertCodeMessage) (*ConvertCodeResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method ConvertCodeName not implemented")
+}
+func (UnimplementedC2ServiceServer) Subscribe(*emptypb.Empty, grpc.ServerStreamingServer[ServerEvent]) error {
+	return status.Error(codes.Unimplemented, "method Subscribe not implemented")
 }
 func (UnimplementedC2ServiceServer) mustEmbedUnimplementedC2ServiceServer() {}
 func (UnimplementedC2ServiceServer) testEmbeddedByValue()                   {}
@@ -110,6 +166,53 @@ func _C2Service_SendCommand_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _C2Service_ListClients_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(C2ServiceServer).ListClients(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: C2Service_ListClients_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(C2ServiceServer).ListClients(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _C2Service_ConvertCodeName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConvertCodeMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(C2ServiceServer).ConvertCodeName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: C2Service_ConvertCodeName_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(C2ServiceServer).ConvertCodeName(ctx, req.(*ConvertCodeMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _C2Service_Subscribe_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(emptypb.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(C2ServiceServer).Subscribe(m, &grpc.GenericServerStream[emptypb.Empty, ServerEvent]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type C2Service_SubscribeServer = grpc.ServerStreamingServer[ServerEvent]
+
 // C2Service_ServiceDesc is the grpc.ServiceDesc for C2Service service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -121,7 +224,21 @@ var C2Service_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "SendCommand",
 			Handler:    _C2Service_SendCommand_Handler,
 		},
+		{
+			MethodName: "ListClients",
+			Handler:    _C2Service_ListClients_Handler,
+		},
+		{
+			MethodName: "ConvertCodeName",
+			Handler:    _C2Service_ConvertCodeName_Handler,
+		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Subscribe",
+			Handler:       _C2Service_Subscribe_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "decs.proto",
 }

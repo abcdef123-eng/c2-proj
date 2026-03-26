@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"time"
 
 	"github.com/execute-assembly/c2-proj/newserver/internal/config"
@@ -22,18 +23,27 @@ func CreateJWT(Guid string) (string, error) {
 	return tokenStr, nil
 }
 
-func VerifyToken(tokenStr string) error {
-	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+func VerifyToken(tokenStr string) (string, error) {
+
+	claims := jwt.MapClaims{}
+
+	parsed, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, jwt.ErrSignatureInvalid
 		}
 		return []byte(config.Cfg.JwtSecret), nil
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
-	if !token.Valid {
-		return jwt.ErrTokenInvalidClaims
+	if !parsed.Valid {
+		return "", jwt.ErrTokenInvalidClaims
 	}
-	return nil
+
+	AgentGuid, ok := claims["guid"].(string)
+	if !ok {
+		return "", errors.New("invalid claims")
+	}
+
+	return AgentGuid, nil
 }

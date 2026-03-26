@@ -5,7 +5,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/execute-assembly/c2-proj/newClient/internal/commander"
+	"github.com/execute-assembly/c2-proj/client/internal/commander"
 	"github.com/peterh/liner"
 )
 
@@ -22,6 +22,10 @@ func RunClient() {
 		} else if err != nil {
 			fmt.Println("[!] Failed reading line:", err)
 			return
+		}
+
+		if input == "" {
+			continue
 		}
 
 		line.AppendHistory(input)

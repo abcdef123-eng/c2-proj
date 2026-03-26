@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package pb;
 
+import "google/protobuf/empty.proto";
+
 // Tell protoc where the Go code should live, matching your module
 option go_package = "github.com/execute-assembly/c2-proj/modules/pb";
 
@@ -15,12 +17,48 @@ message CommandReqData {
 
 // Response message for a command
 message CommandRespData {
-  string status = 1;
+  int32 status = 1;
   string message = 2;
+}
+
+// A single client entry from the clients table
+message ClientEntry {
+  string guid = 1;
+  string code_name = 2;
+  string username = 3;
+  string hostname = 4;
+  string ip = 5;
+  string arch = 6;
+  int32 pid = 7;
+  string version = 8;
+  string last_checkin = 9;
+}
+
+// Response message for listing clients
+message ListClientResp {
+  repeated ClientEntry clients = 1;
+}
+
+message ConvertCodeMessage {
+  string CodeName = 1;
+}
+message ConvertCodeResp {
+  string Guid = 1;
+  int32 status = 2;
+  string errorMsg = 3;
+}
+
+// Server-push event message
+message ServerEvent {
+  string event_type = 1;  // "new_agent", "command_output"
+  string guid = 2;
+  string data = 3;
 }
 
 // Define the gRPC service
 service C2Service {
-  // RPC method: SendCommand
   rpc SendCommand(CommandReqData) returns (CommandRespData);
+  rpc ListClients(google.protobuf.Empty) returns (ListClientResp);
+  rpc ConvertCodeName(ConvertCodeMessage) returns (ConvertCodeResp);
+  rpc Subscribe(google.protobuf.Empty) returns (stream ServerEvent);
 }

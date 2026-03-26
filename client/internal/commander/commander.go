@@ -2,6 +2,7 @@ package commander
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/google/shlex"
@@ -31,11 +32,18 @@ func Parse(args string) (CommandData, error) {
 func Dispatch(Commands CommandData) error {
 	switch Commands.Name {
 	case "ls":
-		fmt.Println("cmd -> ls")
-		break
+		err := HandleLS(Commands.Args)
+		if err != nil {
+			break
+		}
+	case "list":
+		HandleListClients()
+	case "use":
+		UseClient(Commands.Args)
+	case "exit":
+		os.Exit(0)
 	default:
-		fmt.Println("[!] Incorrect Command!")
-		break
+		PrintErr("Incorrect Command!")
 	}
 
 	return nil

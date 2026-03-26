@@ -56,8 +56,8 @@ func CreateScurrierDir(dirpath string) error {
 
 func ValidateSetup(dirpath string) error {
 	checks := []struct {
-		path    string
-		isDir   bool
+		path     string
+		isDir    bool
 		createFn func(string) error
 	}{
 		{filepath.Join(dirpath, "logs"), true, func(p string) error { return os.MkdirAll(p, 0755) }},
@@ -108,26 +108,13 @@ func createDatabase(path string) error {
 		username     TEXT NOT NULL,
 		hostname     TEXT NOT NULL,
 		ip           TEXT NOT NULL,
-		arch         INT NOT NULL,
+		arch         TEXT NOT NULL,
 		pid          INT NOT NULL,
 		version      TEXT NOT NULL,
 		last_checkin TEXT NOT NULL
 	)`
 
-	commandsTable := `CREATE TABLE IF NOT EXISTS commands(
-		guid       TEXT NOT NULL,
-		code       INT NOT NULL,
-		param1     TEXT NOT NULL,
-		param2     TEXT NOT NULL,
-		command_id INT NOT NULL,
-		executed   INT NOT NULL,
-		tasked_at  TEXT NOT NULL
-	)`
-
 	if _, err := db.Exec(clientTable); err != nil {
-		return err
-	}
-	if _, err := db.Exec(commandsTable); err != nil {
 		return err
 	}
 

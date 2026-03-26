@@ -9,6 +9,7 @@ package pb
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -93,7 +94,7 @@ func (x *CommandReqData) GetParam2() string {
 // Response message for a command
 type CommandRespData struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
+	Status        int32                  `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`
 	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -129,11 +130,11 @@ func (*CommandRespData) Descriptor() ([]byte, []int) {
 	return file_decs_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *CommandRespData) GetStatus() string {
+func (x *CommandRespData) GetStatus() int32 {
 	if x != nil {
 		return x.Status
 	}
-	return ""
+	return 0
 }
 
 func (x *CommandRespData) GetMessage() string {
@@ -143,22 +144,367 @@ func (x *CommandRespData) GetMessage() string {
 	return ""
 }
 
+// A single client entry from the clients table
+type ClientEntry struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Guid          string                 `protobuf:"bytes,1,opt,name=guid,proto3" json:"guid,omitempty"`
+	CodeName      string                 `protobuf:"bytes,2,opt,name=code_name,json=codeName,proto3" json:"code_name,omitempty"`
+	Username      string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
+	Hostname      string                 `protobuf:"bytes,4,opt,name=hostname,proto3" json:"hostname,omitempty"`
+	Ip            string                 `protobuf:"bytes,5,opt,name=ip,proto3" json:"ip,omitempty"`
+	Arch          string                 `protobuf:"bytes,6,opt,name=arch,proto3" json:"arch,omitempty"`
+	Pid           int32                  `protobuf:"varint,7,opt,name=pid,proto3" json:"pid,omitempty"`
+	Version       string                 `protobuf:"bytes,8,opt,name=version,proto3" json:"version,omitempty"`
+	LastCheckin   string                 `protobuf:"bytes,9,opt,name=last_checkin,json=lastCheckin,proto3" json:"last_checkin,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClientEntry) Reset() {
+	*x = ClientEntry{}
+	mi := &file_decs_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClientEntry) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClientEntry) ProtoMessage() {}
+
+func (x *ClientEntry) ProtoReflect() protoreflect.Message {
+	mi := &file_decs_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClientEntry.ProtoReflect.Descriptor instead.
+func (*ClientEntry) Descriptor() ([]byte, []int) {
+	return file_decs_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ClientEntry) GetGuid() string {
+	if x != nil {
+		return x.Guid
+	}
+	return ""
+}
+
+func (x *ClientEntry) GetCodeName() string {
+	if x != nil {
+		return x.CodeName
+	}
+	return ""
+}
+
+func (x *ClientEntry) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *ClientEntry) GetHostname() string {
+	if x != nil {
+		return x.Hostname
+	}
+	return ""
+}
+
+func (x *ClientEntry) GetIp() string {
+	if x != nil {
+		return x.Ip
+	}
+	return ""
+}
+
+func (x *ClientEntry) GetArch() string {
+	if x != nil {
+		return x.Arch
+	}
+	return ""
+}
+
+func (x *ClientEntry) GetPid() int32 {
+	if x != nil {
+		return x.Pid
+	}
+	return 0
+}
+
+func (x *ClientEntry) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
+func (x *ClientEntry) GetLastCheckin() string {
+	if x != nil {
+		return x.LastCheckin
+	}
+	return ""
+}
+
+// Response message for listing clients
+type ListClientResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Clients       []*ClientEntry         `protobuf:"bytes,1,rep,name=clients,proto3" json:"clients,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListClientResp) Reset() {
+	*x = ListClientResp{}
+	mi := &file_decs_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListClientResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListClientResp) ProtoMessage() {}
+
+func (x *ListClientResp) ProtoReflect() protoreflect.Message {
+	mi := &file_decs_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListClientResp.ProtoReflect.Descriptor instead.
+func (*ListClientResp) Descriptor() ([]byte, []int) {
+	return file_decs_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ListClientResp) GetClients() []*ClientEntry {
+	if x != nil {
+		return x.Clients
+	}
+	return nil
+}
+
+type ConvertCodeMessage struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CodeName      string                 `protobuf:"bytes,1,opt,name=CodeName,proto3" json:"CodeName,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConvertCodeMessage) Reset() {
+	*x = ConvertCodeMessage{}
+	mi := &file_decs_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConvertCodeMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConvertCodeMessage) ProtoMessage() {}
+
+func (x *ConvertCodeMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_decs_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConvertCodeMessage.ProtoReflect.Descriptor instead.
+func (*ConvertCodeMessage) Descriptor() ([]byte, []int) {
+	return file_decs_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ConvertCodeMessage) GetCodeName() string {
+	if x != nil {
+		return x.CodeName
+	}
+	return ""
+}
+
+type ConvertCodeResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Guid          string                 `protobuf:"bytes,1,opt,name=Guid,proto3" json:"Guid,omitempty"`
+	Status        int32                  `protobuf:"varint,2,opt,name=status,proto3" json:"status,omitempty"`
+	ErrorMsg      string                 `protobuf:"bytes,3,opt,name=errorMsg,proto3" json:"errorMsg,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConvertCodeResp) Reset() {
+	*x = ConvertCodeResp{}
+	mi := &file_decs_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConvertCodeResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConvertCodeResp) ProtoMessage() {}
+
+func (x *ConvertCodeResp) ProtoReflect() protoreflect.Message {
+	mi := &file_decs_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConvertCodeResp.ProtoReflect.Descriptor instead.
+func (*ConvertCodeResp) Descriptor() ([]byte, []int) {
+	return file_decs_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ConvertCodeResp) GetGuid() string {
+	if x != nil {
+		return x.Guid
+	}
+	return ""
+}
+
+func (x *ConvertCodeResp) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *ConvertCodeResp) GetErrorMsg() string {
+	if x != nil {
+		return x.ErrorMsg
+	}
+	return ""
+}
+
+// Server-push event message
+type ServerEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EventType     string                 `protobuf:"bytes,1,opt,name=event_type,json=eventType,proto3" json:"event_type,omitempty"` // "new_agent", "command_output"
+	Guid          string                 `protobuf:"bytes,2,opt,name=guid,proto3" json:"guid,omitempty"`
+	Data          string                 `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ServerEvent) Reset() {
+	*x = ServerEvent{}
+	mi := &file_decs_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ServerEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ServerEvent) ProtoMessage() {}
+
+func (x *ServerEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_decs_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ServerEvent.ProtoReflect.Descriptor instead.
+func (*ServerEvent) Descriptor() ([]byte, []int) {
+	return file_decs_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ServerEvent) GetEventType() string {
+	if x != nil {
+		return x.EventType
+	}
+	return ""
+}
+
+func (x *ServerEvent) GetGuid() string {
+	if x != nil {
+		return x.Guid
+	}
+	return ""
+}
+
+func (x *ServerEvent) GetData() string {
+	if x != nil {
+		return x.Data
+	}
+	return ""
+}
+
 var File_decs_proto protoreflect.FileDescriptor
 
 const file_decs_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"decs.proto\x12\x02pb\"u\n" +
+	"decs.proto\x12\x02pb\x1a\x1bgoogle/protobuf/empty.proto\"u\n" +
 	"\x0eCommandReqData\x12\x12\n" +
 	"\x04guid\x18\x01 \x01(\tR\x04guid\x12!\n" +
 	"\fcommand_code\x18\x02 \x01(\x05R\vcommandCode\x12\x14\n" +
 	"\x05param\x18\x03 \x01(\tR\x05param\x12\x16\n" +
 	"\x06param2\x18\x04 \x01(\tR\x06param2\"C\n" +
 	"\x0fCommandRespData\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\tR\x06status\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage2C\n" +
+	"\x06status\x18\x01 \x01(\x05R\x06status\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xe9\x01\n" +
+	"\vClientEntry\x12\x12\n" +
+	"\x04guid\x18\x01 \x01(\tR\x04guid\x12\x1b\n" +
+	"\tcode_name\x18\x02 \x01(\tR\bcodeName\x12\x1a\n" +
+	"\busername\x18\x03 \x01(\tR\busername\x12\x1a\n" +
+	"\bhostname\x18\x04 \x01(\tR\bhostname\x12\x0e\n" +
+	"\x02ip\x18\x05 \x01(\tR\x02ip\x12\x12\n" +
+	"\x04arch\x18\x06 \x01(\tR\x04arch\x12\x10\n" +
+	"\x03pid\x18\a \x01(\x05R\x03pid\x12\x18\n" +
+	"\aversion\x18\b \x01(\tR\aversion\x12!\n" +
+	"\flast_checkin\x18\t \x01(\tR\vlastCheckin\";\n" +
+	"\x0eListClientResp\x12)\n" +
+	"\aclients\x18\x01 \x03(\v2\x0f.pb.ClientEntryR\aclients\"0\n" +
+	"\x12ConvertCodeMessage\x12\x1a\n" +
+	"\bCodeName\x18\x01 \x01(\tR\bCodeName\"Y\n" +
+	"\x0fConvertCodeResp\x12\x12\n" +
+	"\x04Guid\x18\x01 \x01(\tR\x04Guid\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\x05R\x06status\x12\x1a\n" +
+	"\berrorMsg\x18\x03 \x01(\tR\berrorMsg\"T\n" +
+	"\vServerEvent\x12\x1d\n" +
+	"\n" +
+	"event_type\x18\x01 \x01(\tR\teventType\x12\x12\n" +
+	"\x04guid\x18\x02 \x01(\tR\x04guid\x12\x12\n" +
+	"\x04data\x18\x03 \x01(\tR\x04data2\xf6\x01\n" +
 	"\tC2Service\x126\n" +
-	"\vSendCommand\x12\x12.pb.CommandReqData\x1a\x13.pb.CommandRespDataB0Z.github.com/execute-assembly/c2-proj/modules/pbb\x06proto3"
+	"\vSendCommand\x12\x12.pb.CommandReqData\x1a\x13.pb.CommandRespData\x129\n" +
+	"\vListClients\x12\x16.google.protobuf.Empty\x1a\x12.pb.ListClientResp\x12>\n" +
+	"\x0fConvertCodeName\x12\x16.pb.ConvertCodeMessage\x1a\x13.pb.ConvertCodeResp\x126\n" +
+	"\tSubscribe\x12\x16.google.protobuf.Empty\x1a\x0f.pb.ServerEvent0\x01B0Z.github.com/execute-assembly/c2-proj/modules/pbb\x06proto3"
 
 var (
 	file_decs_proto_rawDescOnce sync.Once
@@ -172,19 +518,32 @@ func file_decs_proto_rawDescGZIP() []byte {
 	return file_decs_proto_rawDescData
 }
 
-var file_decs_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_decs_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_decs_proto_goTypes = []any{
-	(*CommandReqData)(nil),  // 0: pb.CommandReqData
-	(*CommandRespData)(nil), // 1: pb.CommandRespData
+	(*CommandReqData)(nil),     // 0: pb.CommandReqData
+	(*CommandRespData)(nil),    // 1: pb.CommandRespData
+	(*ClientEntry)(nil),        // 2: pb.ClientEntry
+	(*ListClientResp)(nil),     // 3: pb.ListClientResp
+	(*ConvertCodeMessage)(nil), // 4: pb.ConvertCodeMessage
+	(*ConvertCodeResp)(nil),    // 5: pb.ConvertCodeResp
+	(*ServerEvent)(nil),        // 6: pb.ServerEvent
+	(*emptypb.Empty)(nil),      // 7: google.protobuf.Empty
 }
 var file_decs_proto_depIdxs = []int32{
-	0, // 0: pb.C2Service.SendCommand:input_type -> pb.CommandReqData
-	1, // 1: pb.C2Service.SendCommand:output_type -> pb.CommandRespData
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2, // 0: pb.ListClientResp.clients:type_name -> pb.ClientEntry
+	0, // 1: pb.C2Service.SendCommand:input_type -> pb.CommandReqData
+	7, // 2: pb.C2Service.ListClients:input_type -> google.protobuf.Empty
+	4, // 3: pb.C2Service.ConvertCodeName:input_type -> pb.ConvertCodeMessage
+	7, // 4: pb.C2Service.Subscribe:input_type -> google.protobuf.Empty
+	1, // 5: pb.C2Service.SendCommand:output_type -> pb.CommandRespData
+	3, // 6: pb.C2Service.ListClients:output_type -> pb.ListClientResp
+	5, // 7: pb.C2Service.ConvertCodeName:output_type -> pb.ConvertCodeResp
+	6, // 8: pb.C2Service.Subscribe:output_type -> pb.ServerEvent
+	5, // [5:9] is the sub-list for method output_type
+	1, // [1:5] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_decs_proto_init() }
@@ -198,7 +557,7 @@ func file_decs_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_decs_proto_rawDesc), len(file_decs_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
