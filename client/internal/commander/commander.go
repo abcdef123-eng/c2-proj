@@ -37,6 +37,13 @@ func Dispatch(cmd CommandData) error {
 		HandleListClients()
 	case "use":
 		UseClient(cmd.Args)
+	case "history":
+		HandleHistory()
+	case "tasks":
+		HandleTasks()
+	case "back":
+		ClientInUse = ""
+		ClientCodeName = ""
 	case "exit":
 		os.Exit(0)
 	default:

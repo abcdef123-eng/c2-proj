@@ -6,13 +6,21 @@ import (
 	"path/filepath"
 )
 
+type Header struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
 type Config struct {
-	Host         string `json:"host"`
-	Port         int    `json:"port"`
-	GrpcPort     int    `json:"grpc_port"`
-	GetEndpoint  string `json:"getEndpoint"`
-	PostEndpoint string `json:"postEndpoint"`
-	JwtSecret    string `json:"jwt_secret"`
+	Host         string   `json:"host"`
+	Port         int      `json:"port"`
+	GrpcPort     int      `json:"grpc_port"`
+	GetEndpoint  string   `json:"getEndpoint"`
+	PostEndpoint string   `json:"postEndpoint"`
+	JwtSecret    string   `json:"jwt_secret"`
+	GetTypeParam string   `json:"get_type_param"`
+	GetHeaders   []Header `json:"get_headers"`
+	PostHeaders  []Header `json:"post_headers"`
 }
 
 var Cfg *Config

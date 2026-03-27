@@ -86,7 +86,16 @@ func createDefaultConfig(path string) error {
 	"grpc_port": 50051,
 	"getEndpoint": "/api/get",
 	"postEndpoint": "/api/post",
-	"jwt_secret": "changeme"
+	"jwt_secret": "changeme",
+	"get_type_param": "id",
+	"get_headers": [
+		{"name": "Content-Type", "value": "application/json"},
+		{"name": "Server", "value": "nginx/1.24.0"}
+	],
+	"post_headers": [
+		{"name": "Content-Type", "value": "application/json"},
+		{"name": "Server", "value": "nginx/1.24.0"}
+	]
 }`
 	return os.WriteFile(path, []byte(defaultConfig), 0644)
 }

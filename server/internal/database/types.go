@@ -1,15 +1,24 @@
 package database
 
 var (
-	verbs = []string{"jump", "run", "walk", "fly", "chase", "catch", "dream", "build", "grow",
-		"swim", "drive", "ride", "seek", "discover", "shine", "ignite", "transform",
-		"explore", "climb", "leap",
+	verbs = []string{
+		"JUMP", "RUN", "WALK", "FLY", "CHASE", "CATCH", "DREAM", "BUILD", "GROW",
+		"SWIM", "DRIVE", "RIDE", "SEEK", "DISCOVER", "SHINE", "IGNITE", "TRANSFORM",
+		"EXPLORE", "CLIMB", "LEAP", "STRIKE", "SURGE", "DRIFT", "HUNT", "FORGE",
+		"BREACH", "PIERCE", "VANISH", "HAUNT", "CARVE", "SMASH", "STALK", "DEVOUR",
+		"SCATTER", "LURK", "RECLAIM", "ASCEND", "DESCEND", "INTERCEPT", "SHATTER",
+		"BURN", "FREEZE", "CRASH", "SLICE", "ROAM", "PLUNGE", "CONQUER", "EVADE",
+		"STORM", "ECHO",
 	}
 
 	nouns = []string{
-		"wolf", "eagle", "mountain", "river", "dream", "star", "fire", "light",
-		"heart", "breeze", "night", "vision", "cloud", "storm", "flame", "earth",
-		"ocean", "soul", "thunder", "horizon",
+		"WOLF", "EAGLE", "MOUNTAIN", "RIVER", "STAR", "FIRE", "LIGHT", "HEART",
+		"BREEZE", "NIGHT", "VISION", "CLOUD", "STORM", "FLAME", "EARTH", "OCEAN",
+		"SOUL", "THUNDER", "HORIZON", "PHANTOM", "RAVEN", "CIPHER", "VIPER", "COBRA",
+		"FALCON", "SPECTER", "WRAITH", "TITAN", "HYDRA", "DRAGON", "BLADE", "ARROW",
+		"GHOST", "SHADOW", "IRON", "STEEL", "FROST", "ASH", "EMBER", "VOID",
+		"SENTINEL", "APEX", "NEXUS", "VECTOR", "PULSE", "SIGNAL", "DAGGER", "CRYPT",
+		"ORACLE", "ABYSS",
 	}
 )
 

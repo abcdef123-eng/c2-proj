@@ -9,21 +9,27 @@ import (
 
 	"text/tabwriter"
 
+	clientdb "github.com/execute-assembly/c2-proj/client/internal/db"
 	"github.com/execute-assembly/c2-proj/client/internal/rpc"
 	"github.com/execute-assembly/c2-proj/modules/pb"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 var ClientInUse string
+var ClientCodeName string
+
+var ClientCache = map[string]string{}
 
 func ConvertTime(unixTime string) string {
+
 	timeInt, err := strconv.ParseInt(unixTime, 10, 64)
 	if err != nil {
 		return ""
 	}
 
 	t := time.Unix(timeInt, 0)
-	duration := time.Since(t)
+	now := time.Now()
+	duration := now.Sub(t)
 
 	if duration < time.Minute {
 		return fmt.Sprintf("%ds", int(duration.Seconds()))
@@ -32,7 +38,9 @@ func ConvertTime(unixTime string) string {
 	} else if duration < 24*time.Hour {
 		return fmt.Sprintf("%dh", int(duration.Hours()))
 	}
-	return fmt.Sprintf("%dd", int(duration.Hours()/24))
+
+	return ""
+
 }
 
 func HandleListClients() error {
@@ -58,6 +66,7 @@ func HandleListClients() error {
 	fmt.Printf("\n")
 
 	return nil
+
 }
 
 func UseClient(args []string) error {
@@ -66,18 +75,25 @@ func UseClient(args []string) error {
 		return fmt.Errorf("Not Enough Args")
 	}
 
-	resp, err := rpc.Client.ConvertCodeName(context.Background(), &pb.ConvertCodeMessage{CodeName: args[0]})
-	if err != nil {
-		PrintErr(fmt.Sprintf("Unknown Error: %s", err))
-		return err
-	}
-	if resp.Status == 3 {
-		PrintErr("User not found")
-		return fmt.Errorf("user not found")
+	codeName := args[0]
+	guid, cached := ClientCache[codeName]
+	if !cached {
+		resp, err := rpc.Client.ConvertCodeName(context.Background(), &pb.ConvertCodeMessage{CodeName: codeName})
+		if err != nil {
+			PrintErr(fmt.Sprintf("Unknown Error: %s", err))
+			return err
+		}
+		if resp.Status == 3 {
+			PrintErr("User not found")
+			return fmt.Errorf("user not found")
+		}
+		ClientCache[codeName] = resp.Guid
+		guid = resp.Guid
 	}
 
-	ClientInUse = resp.Guid
-	PrintOk(fmt.Sprintf("Using Agent %s", BoldWhite(fmt.Sprintf("%s[%s]", args[0], ClientInUse))))
+	ClientInUse = guid
+	ClientCodeName = codeName
+	PrintOk(fmt.Sprintf("Using Agent %s", BoldWhite(fmt.Sprintf("%s[%s]", codeName, ClientInUse))))
 
 	return nil
 }
@@ -91,6 +107,16 @@ var CommandMap = map[string]int{
 	"get-privs": 0x6,
 }
 
+func HandleHistory() {
+	if ClientInUse == "" {
+		PrintErr("No agent selected")
+		return
+	}
+	if err := clientdb.ListHistory(Out, false); err != nil {
+		PrintErr("Failed to list history: " + err.Error())
+	}
+}
+
 func HandleLS(args []string) error {
 	if ClientInUse == "" {
 		PrintErr("Must choose agents code_name")
@@ -101,11 +127,9 @@ func HandleLS(args []string) error {
 		return fmt.Errorf("Not Enough Args")
 	}
 
-	resp, err := rpc.Client.SendCommand(context.Background(), &pb.CommandReqData{
-		Guid:        ClientInUse,
+	resp, err := rpc.Client.SendCommand(context.Background(), &pb.CommandReqData{Guid: ClientInUse,
 		CommandCode: int32(CommandMap["ls"]),
-		Param:       args[0],
-	})
+		Param:       args[0]})
 	if err != nil {
 		return err
 	}
@@ -113,7 +137,20 @@ func HandleLS(args []string) error {
 	if resp.Status == 1 {
 		PrintErr("User Doesnt exist!")
 	} else if resp.Status == 0 {
-		PrintOk("Command Queued")
+		str := fmt.Sprintf("Agent [%s] Tasked To run ls [%d]", ClientInUse, resp.TaskId)
+		PrintOk(str)
+		clientdb.InsertTask(resp.TaskId, ClientInUse, "ls", args[0], "")
 	}
 	return nil
+
+}
+
+func HandleTasks() {
+	if ClientInUse == "" {
+		PrintErr("No agent selected")
+		return
+	}
+	if err := clientdb.ListHistory(Out, true); err != nil {
+		PrintErr("Failed to list Tasks: " + err.Error())
+	}
 }

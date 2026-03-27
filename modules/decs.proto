@@ -19,6 +19,7 @@ message CommandReqData {
 message CommandRespData {
   int32 status = 1;
   string message = 2;
+  int32 task_id = 3;
 }
 
 // A single client entry from the clients table
@@ -50,9 +51,10 @@ message ConvertCodeResp {
 
 // Server-push event message
 message ServerEvent {
-  string event_type = 1;  // "new_agent", "command_output"
+  int32 event_type = 1; // "new_agent", "command_output"
   string guid = 2;
   string data = 3;
+  int32 task_id = 4;
 }
 
 // Define the gRPC service

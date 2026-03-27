@@ -2,6 +2,7 @@ package database
 
 import (
 	"bytes"
+	"database/sql"
 	"fmt"
 	"log/slog"
 	"math/rand"
@@ -12,10 +13,15 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-func genCodename() string {
-	str1 := nouns[rand.Intn(len(nouns))]
-	str2 := verbs[rand.Intn(len(verbs))]
-	return fmt.Sprintf("%s_%s", str1, str2)
+func genCodename(db *sql.DB) string {
+	for {
+		name := fmt.Sprintf("%s_%s", nouns[rand.Intn(len(nouns))], verbs[rand.Intn(len(verbs))])
+		var exists bool
+		db.QueryRow("SELECT EXISTS(SELECT 1 FROM clients WHERE code_name = ?)", name).Scan(&exists)
+		if !exists {
+			return name
+		}
+	}
 }
 
 func ArchIntToString(arch byte) string {
@@ -41,7 +47,7 @@ func RegisterClient(data *bytes.Reader, IpAddress string) (string, string, error
 		return "", "", err
 	}
 
-	codeName := genCodename()
+	codeName := genCodename(db)
 	query := `INSERT INTO clients(guid, code_name, username, hostname, ip, pid, arch, version, last_checkin) VALUES(?,?,?,?,?,?,?,?,?)`
 
 	_, err = db.Exec(query, clientData.Guid, codeName, clientData.Username, clientData.Hostname, clientData.Ip, clientData.Pid, ArchIntToString(clientData.Arch), clientData.WinVersion, time.Now().Unix())

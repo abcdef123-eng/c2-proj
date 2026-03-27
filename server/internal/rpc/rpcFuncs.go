@@ -18,9 +18,20 @@ type CommandData struct {
 	Param2      string
 }
 
+type PendingTasksMap struct {
+	CommandCode int
+	Guid        string
+	tasked_at   string
+	Param1      string
+	Param2      string
+}
+
 var (
 	CommandMap = map[string][]CommandData{}
 	CommandMu  sync.RWMutex
+
+	PendingTasks = map[int32]PendingTasksMap{}
+	PendingMu    sync.RWMutex
 )
 
 var (
@@ -37,11 +48,11 @@ func (s *Server) Subscribe(req *emptypb.Empty, stream pb.C2Service_SubscribeServ
 	return nil
 }
 
-func BroadcastEvent(eventType, guid, data string) {
+func BroadcastEvent(eventType int32, guid, data string, taskId int32) {
 	subMu.Lock()
 	defer subMu.Unlock()
 	for _, s := range subscribers {
-		s.Send(&pb.ServerEvent{EventType: eventType, Guid: guid, Data: data})
+		s.Send(&pb.ServerEvent{EventType: eventType, Guid: guid, Data: data, TaskId: taskId})
 	}
 }
 
@@ -83,16 +94,17 @@ func (s *Server) SendCommand(ctx context.Context, req *pb.CommandReqData) (*pb.C
 		return &pb.CommandRespData{Status: 1, Message: "User Doesnt Exist!"}, nil
 	}
 
+	TaskId := GenerateTaskId()
 	CommandMu.Lock()
 	CommandMap[req.Guid] = append(CommandMap[req.Guid], CommandData{
-		TaskID:      GenerateTaskId(),
+		TaskID:      TaskId,
 		CommandCode: int(req.CommandCode),
 		Param1:      req.Param,
 		Param2:      req.Param2,
 	})
 	CommandMu.Unlock()
 
-	return &pb.CommandRespData{Status: 0, Message: "Command Queued!"}, nil
+	return &pb.CommandRespData{Status: 0, Message: "Command Queued!", TaskId: TaskId}, nil
 }
 
 func (s *Server) ConvertCodeName(ctx context.Context, req *pb.ConvertCodeMessage) (*pb.ConvertCodeResp, error) {

@@ -14,7 +14,7 @@ type RegisterClientData struct {
 	Arch       byte
 	Ip         string
 	WinVersion string
-	Pid        uint32
+	Pid        int32
 }
 
 type Reader struct {
@@ -22,11 +22,11 @@ type Reader struct {
 	err error
 }
 
-func (r *Reader) Read4() uint32 {
+func (r *Reader) Read4() int32 {
 	if r.err != nil {
 		return 0
 	}
-	var val uint32
+	var val int32
 	r.err = binary.Read(r.r, binary.LittleEndian, &val)
 	return val
 }
@@ -49,7 +49,7 @@ func (r *Reader) Read2() uint16 {
 	return val
 }
 
-func (r *Reader) ReadString(len uint32) string {
+func (r *Reader) ReadString(len int32) string {
 	if r.err != nil {
 		return ""
 	}
@@ -60,7 +60,7 @@ func (r *Reader) ReadString(len uint32) string {
 
 /*
  * [Guid Length] 4 bytes
- * [Guid string] N bytes
+ * [Gudi string] N bytes
  * [Username length] 4 bytes
  * [username string] N bytes
  * [Hostname length] 4 bytes
@@ -119,5 +119,40 @@ func ParseWindowsVersion(major, minor, build int) string {
 	if v, ok := windowsVersions[key]; ok {
 		return v
 	}
-	return key // fallback to raw version string
+	return key
+
+}
+
+/*
+ * [task ID] 4 bytes
+ * [Output Length] 4 bytes
+ * [Output Data] N bytes
+ *
+ */
+
+type OutputList struct {
+	TaskID int32
+	Output string
+}
+
+func ParseCommandOutput(r *bytes.Reader) ([]OutputList, error) {
+	rd := &Reader{r: r}
+	var results []OutputList
+	for r.Len() > 0 {
+		TaskID := rd.Read4()
+		OutputLen := rd.Read4()
+		Output := rd.ReadString(OutputLen)
+		if rd.err != nil {
+			return nil, rd.err
+		}
+
+		results = append(results, OutputList{
+			TaskID: TaskID,
+			Output: Output,
+		})
+
+	}
+
+	return results, nil
+
 }

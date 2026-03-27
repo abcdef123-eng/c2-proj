@@ -10,7 +10,11 @@ import (
 	"time"
 )
 
-const COMMAND_REGISTER_CLIENT = 50
+const (
+	COMMAND_REGISTER_CLIENT = 50
+	COMMAND_POST_OUTPUT     = 52
+	COMMAND_GET_TASK        = 51
+)
 
 var CommandNames = map[int32]string{
 	0x1: "ls",
@@ -30,9 +34,14 @@ var CommandParamCount = map[int32]int{
 	0x6: 0,
 }
 
+type Task struct {
+	TaskID      int32
+	CommandCode int32
+	Param1      string
+}
+
 func writeString(buf *bytes.Buffer, s string) {
-	length := uint32(len(s))
-	binary.Write(buf, binary.LittleEndian, length)
+	binary.Write(buf, binary.LittleEndian, uint32(len(s)))
 	buf.WriteString(s)
 }
 
@@ -83,7 +92,6 @@ func register() string {
 	defer resp.Body.Close()
 
 	fmt.Println("[register] status:", resp.Status)
-
 	if resp.StatusCode != http.StatusOK {
 		fmt.Println("[register] unexpected status:", resp.Status)
 		os.Exit(1)
@@ -105,54 +113,52 @@ func register() string {
 	return jwt
 }
 
-func pollTasks(jwt string) {
+func pollTasks(jwt string) []Task {
 	req, err := http.NewRequest("GET", "http://localhost:8080/api/get", nil)
 	if err != nil {
 		fmt.Println("failed to create task request:", err)
-		return
+		return nil
 	}
 	req.Header.Set("Authorization", "Bearer "+jwt)
+	q := req.URL.Query()
+	q.Set("id", fmt.Sprintf("%d", COMMAND_GET_TASK))
+	req.URL.RawQuery = q.Encode()
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println("failed to send task request:", err)
-		return
+		return nil
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusCreated {
 		fmt.Println("[tasks] no tasks queued")
-		return
+		return nil
 	}
 	if resp.StatusCode != http.StatusOK {
 		fmt.Println("[tasks] unexpected status:", resp.Status)
-		return
+		return nil
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("failed to read task response:", err)
-		return
+		return nil
 	}
 
-	if len(body) == 0 {
-		fmt.Println("[tasks] no tasks queued")
-		return
-	}
-
+	var tasks []Task
 	r := bytes.NewReader(body)
 	taskNum := 0
 	for r.Len() > 0 {
 		taskNum++
-		var taskID int32
-		var commandCode int32
+		var taskID, commandCode int32
 		if err := binary.Read(r, binary.LittleEndian, &taskID); err != nil {
 			fmt.Println("failed to read task ID:", err)
-			return
+			return tasks
 		}
 		if err := binary.Read(r, binary.LittleEndian, &commandCode); err != nil {
 			fmt.Println("failed to read command code:", err)
-			return
+			return tasks
 		}
 
 		name, ok := CommandNames[commandCode]
@@ -160,6 +166,7 @@ func pollTasks(jwt string) {
 			name = fmt.Sprintf("unknown(0x%x)", commandCode)
 		}
 
+		task := Task{TaskID: taskID, CommandCode: commandCode}
 		fmt.Printf("[task %d] ID=%d command=%s", taskNum, taskID, name)
 
 		paramCount := CommandParamCount[commandCode]
@@ -167,27 +174,68 @@ func pollTasks(jwt string) {
 			param1, err := readString(r)
 			if err != nil {
 				fmt.Println("\nfailed to read param1:", err)
-				return
+				return tasks
 			}
+			task.Param1 = param1
 			fmt.Printf(" param1=%q", param1)
 		}
 		if paramCount == 2 {
-			param2, err := readString(r)
-			if err != nil {
+			if _, err := readString(r); err != nil {
 				fmt.Println("\nfailed to read param2:", err)
-				return
+				return tasks
 			}
-			fmt.Printf(" param2=%q", param2)
 		}
 		fmt.Println()
+		tasks = append(tasks, task)
 	}
+	return tasks
+}
+
+func sendOutput(jwt string, tasks []Task) {
+	if len(tasks) == 0 {
+		return
+	}
+
+	buf := new(bytes.Buffer)
+	binary.Write(buf, binary.LittleEndian, uint32(COMMAND_POST_OUTPUT))
+	for _, t := range tasks {
+		output := fmt.Sprint("File1.txt\nfile2.txt\nPasswords/\nwhoami.txt\n)")
+		binary.Write(buf, binary.LittleEndian, t.TaskID)
+		writeString(buf, output)
+	}
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/api/post", buf)
+	if err != nil {
+		fmt.Println("failed to create output request:", err)
+		return
+	}
+	req.Header.Set("Authorization", "Bearer "+jwt)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println("failed to send output:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	fmt.Printf("[output] sent %d task outputs, status: %s\n", len(tasks), resp.Status)
 }
 
 func main() {
-	jwt := register()
+	var jwt string
+	if len(os.Args) > 1 {
+		jwt = os.Args[1]
+		fmt.Println("[*] using provided JWT, skipping registration")
+	} else {
+		jwt = register()
+	}
+
 	fmt.Println("Polling for tasks every 3s (Ctrl+C to stop)...")
 	for {
-		pollTasks(jwt)
+		tasks := pollTasks(jwt)
+		if len(tasks) > 0 {
+			sendOutput(jwt, tasks)
+		}
 		time.Sleep(3 * time.Second)
 	}
 }
