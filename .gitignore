@@ -21,8 +21,8 @@ Release/
 server/vendor/
 client/vendor/
 
-# Protobuf generated
-rat/modules/pb/*.go
+
+plan.txt
 
 # Database
 *.db
